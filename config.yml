@@ -1,0 +1,109 @@
+# =============================================================
+# DISCORD ANTINUKE SELFBOT CONFIGURATION
+# =============================================================
+# INSTRUCTIONS:
+# 1. Replace the example values with your own information
+# 2. Save this file
+# 3. Start the selfbot
+# =============================================================
+
+# YOUR ACCOUNT AND SERVER SETTINGS
+selfbot:
+  # PUT YOUR DISCORD TOKEN HERE (NEVER SHARE THIS WITH ANYONE)
+  token: "YOUR_USER_TOKEN_HERE"
+  
+  # SERVERS TO PROTECT (GET THESE IDS BY RIGHT-CLICKING THE SERVER > COPY ID)
+  server1_id: ""  # First server to protect
+  server2_id: ""  # Second server to protect (you can leave this empty)
+  
+  # WHO GETS NOTIFICATIONS (GET THESE IDS BY RIGHT-CLICKING YOUR PROFILE > COPY ID)
+  owner1_id: ""  # Your user ID
+  owner2_id: ""  # Another user ID (optional)
+  
+# PROTECTION SETTINGS - WHAT HAPPENS WHEN SOMEONE RAIDS
+antinuke_settings:
+  # WHAT TO DO WHEN SELFBOT DETECTS AN ATTACKER
+  punishment: "ban"  # Options: "ban", "kick", or "none"
+  
+  auto_recovery: true # Automatically recover the channels and roles that were harmed
+  recover_channels: true  # Recover deleted channels
+  recover_roles: true     # Recover deleted roles
+  recover_kicks: true    # Send DM invites for kicked users (experimental)
+  recovery_delay: 1500     # Milliseconds to wait between recoveries
+  
+  # HOW MANY ACTIONS TRIGGER THE PROTECTION
+  # If someone does more than this number of actions in the time window, they're caught
+  ban_limit: 5                # Triggers if someone bans 5+ people quickly
+  kick_limit: 5               # Triggers if someone kicks 5+ people quickly
+  channel_create_limit: 5     # Triggers if someone creates 5+ channels quickly
+  role_create_limit: 5        # Triggers if someone creates 5+ roles quickly
+  channel_delete_limit: 5     # Triggers if someone deletes 5+ channels quickly
+  role_delete_limit: 5        # Triggers if someone deletes 5+ roles quickly
+  channel_update_limit: 5     # Triggers if someone changes 5+ channels quickly
+  role_update_limit: 5        # Triggers if someone changes 5+ roles quickly
+  member_update_limit: 5      # Triggers if someone changes 5+ members quickly
+  unban_limit: 5              # Triggers if someone unbans 5+ people quickly
+
+  # ROLES TO IGNORE IN MEMBER UPDATES
+  # Add role IDs here that should NOT trigger anti-nuke when assigned/removed
+  # Useful for onboarding roles, autoroles, and other legitimate auto-assignments
+  # In simple terms, put the role ids of non harmful roles which you have configured as onboarding or autoroles in your server
+  # Get role IDs by right-clicking roles in Server Settings > Roles
+  ignored_role_ids: [""]  # ← ADD YOUR ROLE IDs HERE (e.g., ["123456789", "987654321"])
+  
+  # TIME WINDOW FOR COUNTING ACTIONS (IN MILLISECONDS)
+  # 36000000 = 10 hours, 3600000 = 1 hour, 600000 = 10 minutes
+  time_window: 36000000    
+
+# LOGGING SETTINGS - WHERE TO SEND ALERTS
+logs:  
+  # WHAT TYPES OF EVENTS TO LOG
+  log_level: "info"  # Options: "info", "warning", "error", "debug"
+  
+  # SHOW TIMESTAMPS IN LOGS?
+  timestamp: true
+  
+  # WEBHOOK URL FOR SENDING LOGS (LEAVE EMPTY IF NOT USING)
+  log_webhook: ""
+  
+  # SEND DM TO OWNERS WHEN IMPORTANT THINGS HAPPEN?
+  log_owner_dm: false  # Set to true to get DM alerts
+
+# USERS WHO WON'T TRIGGER THE PROTECTION
+# Add IDs of trusted admins you want to exclude from checks
+whitelisted:
+  users: [""]
+
+# ACTIVITY STATUS SETTINGS
+rpc:
+  # SHOW "WATCHING SERVERS" OR SIMILAR STATUS?
+  enabled: true
+  
+  # AUTOMATICALLY CHANGE STATUS MESSAGE?
+  rotation: true
+
+# VANITY URL PROTECTION - ADVANCED FEATURE
+# This allows the bot to automatically revert unauthorized vanity URL changes
+vanity_reversion:
+  # YOUR ACCOUNT PASSWORD (REQUIRED FOR VANITY REVERSION)
+  # IMPORTANT: This is required for the bot to authenticate with Discord's MFA system
+  #           to revert unauthorized vanity URL changes. Without this, the bot can
+  #           still punish attackers but cannot automatically restore the vanity URL.
+  # WARNING:  - Keep this password secure and never share it
+  #           - If this field is incorrect or empty, punishment will occur but
+  #             vanity reversion will fail silently
+  #           - The bot will continue working normally without this feature
+  password: ""  # ← PUT YOUR DISCORD ACCOUNT PASSWORD HERE
+
+  # FALLBACK VANITY CODE (OPTIONAL - RECOMMENDED)
+  # Most of the time Discord's event data isn't cached properly and oldVanity comes as undefined/null
+  # In such cases, the bot will revert to this vanity code instead of failing
+  # IMPORTANT: Put ONLY the vanity code (e.g., "myserver"), NOT the full link (discord.gg/myserver)
+  # If left empty, the bot will remove the vanity URL when old vanity is unavailable
+  # This ensures your server ALWAYS has a working vanity URL after an attack
+  fallback_vanity: ""  # ← PUT YOUR VANITY CODE HERE (just "myserver", not "discord.gg/myserver")
+
+# =============================================================
+# For help with setup, join: https://discord.gg/NUPbGzY8Be
+# Made with ❤️ by Team Zyrus 
+# =============================================================

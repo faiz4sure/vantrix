@@ -1,0 +1,13 @@
+node_modules/
+package-lock.json
+old/
+*test.js
+data/
+logs.txt
+node_modules
+vanity-headers-analysis.json
+response1.txt
+response2.txt
+response3.txt
+.git
+*.zip
