@@ -4,28 +4,7 @@ import AntiNukeManager from '../../utils/AntiNukeManager.js';
 import Logger from '../../utils/Logger.js';
 import axios from 'axios';
 
-const superProps = {
-  os: 'Windows',
-  browser: 'Discord Client',
-  release_channel: 'stable',
-  client_version: '1.0.9213',
-  os_version: '10.0.22000',
-  os_arch: 'x64',
-  app_arch: 'x64',
-  system_locale: 'en-US',
-  has_client_mods: false,
-  browser_user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9213 Chrome/134.0.6998.205 Electron/35.3.0 Safari/537.36',
-  browser_version: '35.3.0',
-  os_sdk_version: '22000',
-  client_build_number: 463817,
-  native_build_number: 71090,
-  client_event_source: null,
-  client_app_state: 'focused'
-};
-
-const encoded = Buffer.from(JSON.stringify(superProps)).toString('base64');
-
-const DISCORD_HEADERS = {
+const headers = {
   Authorization: global.config?.selfbot?.token || global.client?.token,
   'Content-Type': 'application/json',
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9213 Chrome/134.0.6998.205 Electron/35.3.0 Safari/537.36',
@@ -43,24 +22,22 @@ const DISCORD_HEADERS = {
   'sec-ch-ua-platform': '"Windows"',
   'x-debug-options': 'bugReporterEnabled',
   'x-discord-locale': 'en-US',
-  'x-super-properties': encoded
+  'x-super-properties': 'eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiRGlzY29yZCBDbGllbnQiLCJyZWxlYXNlX2NoYW5uZWwiOiJzdGFibGUiLCJjbGllbnRfdmVyc2lvbiI6IjEuMC45MjEzIiwib3NfdmVyc2lvbiI6IjEwLjAuMjIwMDAiLCJvc19hcmNoIjoieDY0IiwiYXBwX2FyY2giOiJ4NjQiLCJzeXN0ZW1fbG9jYWxlIjoiZW4tVVMiLCJoYXNfY2xpZW50X21vZHMiOmZhbHNlLCJicm93c2VyX3VzZXJfYWdlbnQiOiJNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBkaXNjb3JkLzEuMC45MjEzIENocm9tZS8xMzQuMC42OTk4LjIwNSBFbGVjdHJvbi8zNS4zLjAgU2FmYXJpLzUzNy4zNiIsImJyb3dzZXJfdmVyc2lvbiI6IjM1LjMuMCIsIm9zX3Nka192ZXJzaW9uIjoiMjIwMDAiLCJjbGllbnRfYnVpbGRfbnVtYmVyIjo0NjM4MTcsIm5hdGl2ZV9idWlsZF9udW1iZXIiOjcxMDkwLCJjbGllbnRfZXZlbnRfc291cmNlIjpudWxsLCJjbGllbnRfYXBwX3N0YXRlIjoiZm9jdXNlZCJ9'
 };
 
 export default {
     name: 'guildUpdate',
-    once: false, 
+    once: false,
     async execute(oldGuild, newGuild) {
         const guild = newGuild;
 
-        
         if (!AntiNukeManager.isProtectedServer(guild.id)) {
-            return; 
+            return;
         }
 
         const oldVanity = oldGuild.vanityURLCode;
         const newVanity = newGuild.vanityURLCode;
 
-        
         let revertToVanity = oldVanity;
         if ((oldVanity === null || oldVanity === undefined) && global.config?.vanity_reversion?.fallback_vanity) {
             const fallbackVanity = global.config.vanity_reversion.fallback_vanity.trim();
@@ -71,31 +48,29 @@ export default {
         }
 
         if (oldVanity !== newVanity) {
-            Logger.warn(`🚫 Vanity URL changed: "${oldVanity}" → "${newVanity}" in ${guild.name}`, 'warning');
+            Logger.warn(`🚫 Vanity URL changed: "${oldVanity}" → "${newVanity}" in ${guild.name}`);
             Logger.info(`Will revert to: "${revertToVanity}"`);
 
-            
             try {
                 const auditLogs = await guild.fetchAuditLogs({
-                    type: 1, 
+                    type: 1,
                     limit: 1
                 });
 
                 const updateEntry = auditLogs.entries.find(entry =>
-                    entry.executor && 
-                    (Date.now() - entry.createdTimestamp) < 30000 
+                    entry.executor &&
+                    (Date.now() - entry.createdTimestamp) < 30000
                 );
 
                 if (updateEntry && updateEntry.executor) {
                     const executor = updateEntry.executor;
-                    Logger.warn(`Vanity URL changed by: ${executor.tag} (${executor.id})`, 'warning');
+                    Logger.warn(`Vanity URL changed by: ${executor.tag} (${executor.id})`);
 
                     if (AntiNukeManager.shouldIgnore(executor.id)) {
                         Logger.debug(`Ignoring vanity change by ${executor.tag} (${AntiNukeManager.isBot(executor.id) ? 'BOT' : 'WHITELISTED'})`);
                         return;
                     }
 
-                    
                     Logger.warn(`Punishing vanity attacker: ${executor.tag} (${executor.id})`);
                     const punishmentSuccess = await AntiNukeManager.punish(
                         executor.id,
@@ -118,12 +93,12 @@ export default {
                     }
 
                 } else {
-                    Logger.debug(`Could not identify who changed vanity URL in ${guild.name}`, 'debug');
+                    Logger.debug(`Could not identify who changed vanity URL in ${guild.name}`);
                 }
 
             } catch (error) {
-                Logger.error(`Failed to fetch audit logs for vanity change: ${error.message}`, 'error');
-                Logger.debug(`Error details: ${error.stack}`, 'debug');
+                Logger.error(`Failed to fetch audit logs for vanity change: ${error.message}`);
+                Logger.debug(`Error details: ${error.stack}`);
             }
         }
     }
@@ -131,172 +106,118 @@ export default {
 
 
 
-async function getMFATicket(guildId) {
-
+async function getTicket(guildId) {
   try {
     const response = await axios.patch(
       `https://discord.com/api/v9/guilds/${guildId}/vanity-url`,
       { code: 'test' },
-      { headers: DISCORD_HEADERS, validateStatus: () => true }
+      { headers: headers, validateStatus: () => true }
     );
 
-    
+    Logger.debug(`Get ticket response: ${JSON.stringify(response.data)}`);
+
     if (response.status === 401 && response.data?.mfa?.ticket) {
-      const ticket = response.data.mfa.ticket;
-      const sessionCookieString = response.headers['set-cookie']?.map(c => c.split(';')[0]).join('; ') || '';
-
-      return {
-        ticket: ticket,
-        sessionCookies: sessionCookieString
-      };
-    } else {
-      throw new Error('MFA ticket not found in response. Expected 401 with ticket.');
+      return response.data.mfa.ticket;
     }
-
   } catch (error) {
-    Logger.error('Step 1 failed (get MFA ticket):', error.message);
-    throw error;
+    Logger.error(`ticket error: ${error.message}`);
   }
+  return null;
 }
 
-
-async function finishMFA(ticket, password) {
-  const body = {
-    mfa_type: 'password',
-    ticket: ticket,
-    data: password,
-  };
-
+async function finishMFA(ticket) {
   try {
+    const password = global.config?.vanity_reversion?.password;
+    if (!password || password.trim() === '') {
+      Logger.warn('Vanity reversion password not configured');
+      return null;
+    }
+
+    Logger.debug(`Using password for MFA: ${password}`);
+
     const response = await axios.post(
       'https://discord.com/api/v9/mfa/finish',
-      body,
-      { headers: DISCORD_HEADERS }
+      {
+        ticket: ticket,
+        mfa_type: 'password',
+        data: password,
+      },
+      { headers: headers }
     );
 
-    const setCookies = response.headers['set-cookie'] || [];
-    const mfaCookieFull = setCookies.find(cookie => cookie.startsWith('__Secure-recent_mfa='));
+    Logger.debug(`Finish MFA response: ${JSON.stringify(response.data)}`);
 
-    if (mfaCookieFull) {
-      const mfaToken = mfaCookieFull.split(';')[0].replace('__Secure-recent_mfa=', '');
-      const mfaCookie = mfaCookieFull.split(';')[0];
-
-      return {
-        token: mfaToken,
-        cookie: mfaCookie
-      };
-    } else {
-      throw new Error('__Secure-recent_mfa cookie not found in MFA finish response');
+    if (response.data?.token) {
+      return response.data.token;
     }
-
   } catch (error) {
-    Logger.error('Step 2 failed (finish MFA):', error.message);
-    throw error;
+    Logger.error(`mfa error: ${error.message}`);
   }
+  return null;
 }
 
-
-async function changeVanityURL(guildId, newCode, mfaToken, mfaCookie, sessionCookies) {
-  
-  const sessionCookieArray = sessionCookies.split('; ')
-    .filter(cookie => cookie.trim() && !cookie.startsWith('__Secure-recent_mfa='));
-
-  
-  let completeCookieString = mfaCookie;
-  if (sessionCookieArray.length > 0) {
-    completeCookieString = sessionCookieArray.join('; ') + '; ' + mfaCookie;
-  }
-
-  const headersWithMFA = {
-    ...DISCORD_HEADERS,
-    'x-discord-mfa-authorization': mfaToken,
-    'Cookie': completeCookieString
-  };
-
+async function changeVanity(guildId, code, mfaToken) {
   try {
+    const mfaHeaders = {
+      ...headers,
+      'x-discord-mfa-authorization': mfaToken
+    };
+
     const response = await axios.patch(
       `https://discord.com/api/v9/guilds/${guildId}/vanity-url`,
-      { code: newCode },
-      { headers: headersWithMFA }
+      { code: code },
+      { headers: mfaHeaders, validateStatus: () => true }
     );
+
+    Logger.debug(`Change vanity response: ${JSON.stringify(response.data)}`);
 
     if (response.status === 200) {
       return true;
     } else {
-      throw new Error(`Vanity change failed with status ${response.status}`);
-    }
+      let errorMessage = `Vanity change failed with status ${response.status}`;
 
+      if (response.status === 403) {
+        errorMessage += ' - This may occur if the vanity URL is not valid, or Discord is forbidding this account/IP address due to frequent requests on changing vanity URLs';
+      } else if (response.status === 400) {
+        errorMessage += ' - Discord may block multiple requests and just show 400 sometimes. Try again later';
+      } else if (response.status === 401) {
+        errorMessage += ' - Authentication failed. Check if MFA token is valid';
+      } else if (response.status === 429) {
+        errorMessage += ' - Rate limited. Wait a few minutes before trying again';
+      }
+
+      Logger.error(errorMessage);
+      return false;
+    }
   } catch (error) {
-    Logger.error('Step 3 failed (change vanity):', error.message);
-    throw error;
+    Logger.error(`vanity error: ${error.message}`);
+    if (error.response) {
+      Logger.debug(`Change vanity error response: ${JSON.stringify(error.response.data)}`);
+    }
+    return false;
   }
 }
-
 
 async function revertVanityUrl(guild, revertUrl, executor) {
   try {
     Logger.debug(`Attempting to revert vanity URL to "${revertUrl}" in ${guild.name}`);
 
-    
-    const password = global.config?.vanity_reversion?.password;
-    if (!password || password.trim() === '') {
-      Logger.warn(`Vanity reversion password not configured in config.yml`);
-      Logger.warn(`Add your Discord password to config.yml under vanity_reversion.password`);
-      Logger.warn(`Cannot revert vanity URL - punishment only`);
-      return false;
-    }
+    const ticket = await getTicket(guild.id);
+    if (!ticket) return false;
 
-    
-    const { ticket, sessionCookies } = await getMFATicket(guild.id);
+    const mfaToken = await finishMFA(ticket);
+    if (!mfaToken) return false;
 
-    
-    const { token: mfaToken, cookie: mfaCookie } = await finishMFA(ticket, password);
-
-    
-    const success = await changeVanityURL(guild.id, revertUrl, mfaToken, mfaCookie, sessionCookies);
+    const success = await changeVanity(guild.id, revertUrl, mfaToken);
 
     if (success) {
-      Logger.success(`✅ Successfully reverted vanity URL to "${revertUrl}"`);
+      Logger.success(`Successfully reverted vanity URL to "${revertUrl}"`);
       return true;
-    } else {
-      Logger.error(`❌ Failed to revert vanity URL change in ${guild.name}`);
-      return false;
     }
-
   } catch (error) {
     Logger.error(`Failed to revert vanity URL for ${guild.name}: ${error.message}`);
-
-    
-    if (error.response) {
-      const status = error.response.status;
-      const errorMessage = error.response.data?.message || 'Unknown error';
-
-      if (status === 403) {
-        Logger.error(`Insufficient permissions to revert vanity URL (403): ${errorMessage}`);
-        Logger.error(`Make sure the bot account owns this server or has proper permissions`);
-        Logger.error(`Discord may be forbidding the request due to automated detection`);
-      } else if (status === 400) {
-        Logger.error(`Invalid vanity code, ineligible server, or Discord forbidding due to detection (400): ${errorMessage}`);
-        Logger.error(`Check if the vanity URL "${revertUrl}" is valid and the server supports vanity URLs`);
-        Logger.error(`Discord may be forbidding the request due to automated detection`);
-      } else if (status === 401) {
-        Logger.error(`Authentication failed (401): ${errorMessage}`);
-        Logger.error(`Check if the password in config.yml is correct`);
-      } else if (status === 429) {
-        Logger.error(`Rate limited while reverting vanity URL (429): ${errorMessage}`);
-        Logger.error(`Wait a few minutes before trying again`);
-      } else {
-        Logger.error(`API error ${status} while reverting vanity URL: ${errorMessage}`);
-      }
-    } else if (error.code === 'ECONNABORTED') {
-      Logger.error('Request timed out while reverting vanity URL');
-    } else {
-      Logger.error(`Network error while reverting vanity URL: ${error.code || error.message}`);
-    }
-
-    Logger.warn(`Vanity URL reversion failed, but attacker was punished`);
-    return false;
   }
+  return false;
 }
 
 /**

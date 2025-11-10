@@ -6,7 +6,7 @@
 
 [![Discord](https://img.shields.io/discord/1346930640049803266?color=7289da&label=Support%20Server&logo=discord&style=for-the-badge)](https://discord.gg/NUPbGzY8Be)
 [![GitHub Stars](https://img.shields.io/github/stars/faiz4sure/vantrix?color=00bfff&style=for-the-badge&logo=github)](https://github.com/faiz4sure/vantrix/stargazers)
-[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Made in India](https://img.shields.io/badge/Made%20in-India-FF9933?style=for-the-badge&logo=india-flag&logoColor=white)](https://en.wikipedia.org/wiki/India)
 
@@ -183,7 +183,7 @@ We welcome contributions! Please:
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU GPL v3.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## ⚠️ Disclaimer
 
