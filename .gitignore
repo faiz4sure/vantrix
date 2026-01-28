@@ -5,9 +5,11 @@ old/
 data/
 logs.txt
 node_modules
-vanity-headers-analysis.json
+analysis.json
 response1.txt
 response2.txt
 response3.txt
 .git
 *.zip
+db/
+tests/

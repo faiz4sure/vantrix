@@ -1,156 +1,106 @@
-import AntiNukeManager from '../../utils/AntiNukeManager.js';
-import RateLimitManager from '../../utils/RateLimitManager.js';
-import Logger from '../../utils/Logger.js';
-
-const createdRolesCache = new Map();
+import AntiNukeManager from "../../utils/AntiNukeManager.js";
+import RateLimitManager from "../../utils/RateLimitManager.js";
+import Logger from "../../utils/Logger.js";
+import * as db from "../../utils/db.js";
 
 export default {
-    name: 'roleCreate',
-    once: false,
-    async execute(client, role) {
-        const guild = role.guild;
+  name: "roleCreate",
+  once: false,
+  async execute(client, role) {
+    const guild = role.guild;
+    if (!AntiNukeManager.isProtectedServer(guild.id)) return;
 
-        if (!AntiNukeManager.isProtectedServer(guild.id)) {
-            return;
-        }
+    Logger.warn(`Role created: @${role.name} (${role.id}) in ${guild.name}`);
 
-        Logger.warn(`⚔️ Role created: @${role.name} (${role.id}) in ${guild.name}`, 'warning');
-
-        const roleMetadata = {
-            id: role.id,
-            name: role.name,
-            createdAt: Date.now()
-        };
-
-        const cacheKey = `${guild.id}`;
-
-        if (!createdRolesCache.has(cacheKey)) {
-            createdRolesCache.set(cacheKey, []);
-        }
-        createdRolesCache.get(cacheKey).push(roleMetadata);
-
-        if (createdRolesCache.get(cacheKey).length > 100) {
-            createdRolesCache.set(cacheKey, createdRolesCache.get(cacheKey).slice(-100));
-        }
-
-        try {
-            const auditLogs = await guild.fetchAuditLogs({
-                type: 30,
-                limit: 5
-            });
-
-            const createEntry = auditLogs.entries.find(entry =>
-                entry.target?.id === role.id &&
-                entry.executor &&
-                (Date.now() - entry.createdTimestamp) < 30000
-            );
-
-            if (createEntry && createEntry.executor) {
-                const executor = createEntry.executor;
-                Logger.warn(`👤 Role created by: ${executor.tag} (${executor.id})`, 'warning');
-
-                if (AntiNukeManager.shouldIgnore(executor.id)) {
-                    return;
-                }
-
-                const thresholdExceeded = AntiNukeManager.recordAction(
-                    'roleCreations',
-                    executor.id,
-                    guild.id,
-                    false
-                );
-
-                if (thresholdExceeded) {
-                    Logger.warn(`🚨 ROLE CREATION THRESHOLD EXCEEDED - Executing anti-spam protection`, 'warning');
-
-                    const userCreatedRoles = createdRolesCache.get(cacheKey)?.filter(
-                        meta => (Date.now() - meta.createdAt) < 60000
-                    ) || [roleMetadata];
-
-                    const executorPunished = await AntiNukeManager.punish(
-                        executor.id,
-                        guild.id,
-                        `Mass role creation detected - Created ${userCreatedRoles.length} roles`
-                    );
-
-                    let rolesDeleted = 0;
-                    if (AntiNukeManager.isRoleRecoveryEnabled()) {
-                        Logger.warn(`🔄 Auto-recovery enabled - deleting ${userCreatedRoles.length} created roles`, 'warning');
-
-                        const deletePromises = userCreatedRoles.map(meta =>
-                            deleteCreatedRoleById(guild, meta)
-                        );
-
-                        const deleteResults = await Promise.allSettled(deletePromises);
-                        const successfulDeletes = deleteResults.filter(r => r.status === 'fulfilled').length;
-                        const failedDeletes = deleteResults.filter(r => r.status === 'rejected').length;
-
-                        rolesDeleted = successfulDeletes;
-                        Logger.success(`🔄 Role deletion: ${successfulDeletes} succeeded, ${failedDeletes} failed`);
-
-                        if (successfulDeletes > 0) {
-                            createdRolesCache.delete(cacheKey);
-                        }
-
-                    } else {
-                        Logger.info(`🔄 Auto-recovery disabled - keeping created roles`, 'info');
-                    }
-
-                    if (!executorPunished) {
-                        Logger.warn(`⚠️ Punishment failed - cleaning up accumulated actions to prevent threshold inflation`, 'warning');
-                        AntiNukeManager.cleanupActionData('roleCreations', executor.id, guild.id);
-                    } else {
-                        AntiNukeManager.cleanupActionData('roleCreations', executor.id, guild.id);
-                    }
-
-                    Logger.success(`⚔️ Anti-role creation operation completed:`);
-                    Logger.success(`Executor processed: ${executorPunished ? 'PUNISHED' : 'SPARED'} (${executor.tag})`);
-                    Logger.success(`Roles created: ${userCreatedRoles.length}`);
-                    Logger.success(`Roles deleted: ${rolesDeleted}`);
-
-                    AntiNukeManager.markOperationComplete(executor.id);
-                }
-
-            } else {
-                Logger.warn(`⚠️ Could not identify role creator from audit logs`, 'warning');
-                Logger.info(`🔄 Recovery unavailable - unable to verify role creator for @${role.name}`, 'info');
-            }
-
-        } catch (error) {
-            Logger.error(`Failed to fetch audit logs for role creation: ${error.message}`, 'error');
-        }
-    }
-};
-
-async function deleteCreatedRoleById(guild, metadata) {
     try {
-        const role = guild.roles.cache.get(metadata.id);
+      const auditLogs = await guild.fetchAuditLogs({ type: 30, limit: 5 });
+      const createEntry = auditLogs.entries.find(
+        (entry) =>
+          entry.target?.id === role.id &&
+          entry.executor &&
+          Date.now() - entry.createdTimestamp < 30000
+      );
 
-        if (!role) {
-            return false;
-        }
+      if (createEntry && createEntry.executor) {
+        const executor = createEntry.executor;
+        Logger.warn(`Role created by: ${executor.tag} (${executor.id})`);
 
-        await RateLimitManager.execute(
-            `guild.${guild.id}.roles.delete.recovery`,
-            async () => {
-                await sleep(AntiNukeManager.getRecoveryDelay());
-                await role.delete('[AntiNuke] Unauthorized role creation detected');
-            },
-            [],
-            { retryLimit: 3, initialBackoff: 2000 }
+        if (AntiNukeManager.shouldIgnore(executor.id)) return;
+
+        db.saveCreatedRole(guild.id, role.id);
+
+        const thresholdExceeded = AntiNukeManager.recordAction(
+          "roleCreations",
+          executor.id,
+          guild.id,
+          false
         );
 
-        Logger.success(`✅ Deleted created role @${role.name} (${role.id})`);
-        return true;
+        if (thresholdExceeded) {
+          Logger.warn(`ROLE CREATION THRESHOLD EXCEEDED`);
+          const timeWindow =
+            global.config?.antinuke_settings?.time_window || 36000000;
+          const createdRoleIds = db.getCreatedRoles(guild.id, timeWindow);
 
+          const executorPunished = await AntiNukeManager.punish(
+            executor.id,
+            guild.id,
+            `Mass role creation - ${createdRoleIds.length} roles`
+          );
+
+          if (AntiNukeManager.isRoleRecoveryEnabled()) {
+            Logger.warn(`Deleting ${createdRoleIds.length} created roles`);
+            const deletePromises = createdRoleIds.map((roleId) =>
+              deleteCreatedRole(guild, roleId)
+            );
+            const deleteResults = await Promise.allSettled(deletePromises);
+            const successCount = deleteResults.filter(
+              (r) => r.status === "fulfilled"
+            ).length;
+            Logger.success(
+              `Role deletion: ${successCount}/${createdRoleIds.length}`
+            );
+            if (successCount > 0) db.clearCreatedRoles(guild.id);
+          }
+
+          AntiNukeManager.cleanupActionData(
+            "roleCreations",
+            executor.id,
+            guild.id
+          );
+          AntiNukeManager.markOperationComplete(executor.id);
+        }
+      } else {
+        Logger.warn(`Could not identify role creator from audit logs`);
+      }
     } catch (error) {
-        Logger.error(`Failed to delete created role @${metadata.name}: ${error.message}`);
-        return false;
+      Logger.error(`Failed to fetch audit logs: ${error.message}`);
     }
-}
+  },
+};
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+async function deleteCreatedRole(guild, roleId) {
+  try {
+    const role = guild.roles.cache.get(roleId);
+    if (!role) return false;
+
+    await RateLimitManager.execute(
+      `guild.${guild.id}.roles.delete.recovery`,
+      async () => {
+        await new Promise((r) =>
+          setTimeout(r, AntiNukeManager.getRecoveryDelay())
+        );
+        await role.delete("[AntiNuke] Unauthorized role creation");
+      },
+      [],
+      { retryLimit: 3, initialBackoff: 2000 }
+    );
+    Logger.success(`Deleted created role @${role.name}`);
+    return true;
+  } catch (error) {
+    Logger.error(`Failed to delete role: ${error.message}`);
+    return false;
+  }
 }
 
 /**

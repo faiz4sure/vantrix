@@ -3,6 +3,7 @@
 ## 📖 **How to Use This Guide**
 
 This guide explains **every setting** in your `config.yml` file. Each setting includes:
+
 - **What it does** - Clear explanation
 - **Options available** - What you can choose
 - **Recommended values** - Best settings for most users
@@ -15,6 +16,7 @@ This guide explains **every setting** in your `config.yml` file. Each setting in
 ## 🔐 **1. Selfbot Section**
 
 ### **token**
+
 ```
 token: "YOUR_DISCORD_TOKEN_HERE"
 ```
@@ -26,20 +28,21 @@ token: "YOUR_DISCORD_TOKEN_HERE"
 
 ---
 
-### **server1_id & server2_id**
+### **server_id**
+
 ```
-server1_id: "1234567890123456789"
-server2_id: ""  # Optional second server
+server_id: "1234567890123456789"
 ```
 
-**What it does:** Discord server IDs that Vantrix will protect
+**What it does:** Discord server ID that Vantrix will protect
 **How to get:** Right-click server icon → "Copy ID" (requires Developer Mode)
-**Impact:** Bot only monitors these servers
-**Note:** Leave server2_id empty if you only have one server
+**Impact:** Bot only monitors this server
+**Required:** ✅ Yes
 
 ---
 
 ### **owner1_id & owner2_id**
+
 ```
 owner1_id: "9876543210987654321"
 owner2_id: ""  # Optional second owner
@@ -55,11 +58,13 @@ owner2_id: ""  # Optional second owner
 ## 🛡️ **2. Antinuke Settings Section**
 
 ### **punishment**
+
 ```
 punishment: "ban"  # Options: "ban", "kick", "none"
 ```
 
 **What it does:** Action taken when someone triggers anti-nuke
+
 - **"ban"** - Permanently removes the attacker
 - **"kick"** - Removes attacker but they can rejoin
 - **"none"** - Just logs the incident, no punishment
@@ -71,6 +76,7 @@ punishment: "ban"  # Options: "ban", "kick", "none"
 ---
 
 ### **auto_recovery**
+
 ```
 auto_recovery: true
 ```
@@ -83,6 +89,7 @@ auto_recovery: true
 ---
 
 ### **recover_channels**
+
 ```
 recover_channels: true
 ```
@@ -95,6 +102,7 @@ recover_channels: true
 ---
 
 ### **recover_roles**
+
 ```
 recover_roles: true
 ```
@@ -107,6 +115,7 @@ recover_roles: true
 ---
 
 ### **recover_kicks**
+
 ```
 recover_kicks: true
 ```
@@ -119,6 +128,7 @@ recover_kicks: true
 ---
 
 ### **recovery_delay**
+
 ```
 recovery_delay: 1500
 ```
@@ -134,14 +144,17 @@ recovery_delay: 1500
 ## 📊 **3. Action Limits Section**
 
 ### **Understanding Limits**
+
 These settings determine how many actions trigger anti-nuke protection within the time window.
 
 **How it works:**
+
 - Bot counts actions (bans, kicks, etc.) in a time window
 - If count exceeds limit, attacker gets punished
 - Actions are tracked per user, per server
 
 ### **ban_limit**
+
 ```
 ban_limit: 5
 ```
@@ -151,6 +164,7 @@ ban_limit: 5
 **Recommended:** `3-5` depending on server size
 
 ### **kick_limit**
+
 ```
 kick_limit: 5
 ```
@@ -160,6 +174,7 @@ kick_limit: 5
 **Recommended:** `5-10` (kicks are less destructive than bans)
 
 ### **channel_create_limit**
+
 ```
 channel_create_limit: 5
 ```
@@ -169,6 +184,7 @@ channel_create_limit: 5
 **Recommended:** `3-5`
 
 ### **role_create_limit**
+
 ```
 role_create_limit: 5
 ```
@@ -178,6 +194,7 @@ role_create_limit: 5
 **Recommended:** `3-5`
 
 ### **channel_delete_limit**
+
 ```
 channel_delete_limit: 5
 ```
@@ -187,6 +204,7 @@ channel_delete_limit: 5
 **Impact:** ⚠️ Very destructive - low threshold recommended
 
 ### **role_delete_limit**
+
 ```
 role_delete_limit: 5
 ```
@@ -196,6 +214,7 @@ role_delete_limit: 5
 **Impact:** ⚠️ Very destructive - low threshold recommended
 
 ### **channel_update_limit**
+
 ```
 channel_update_limit: 5
 ```
@@ -205,6 +224,7 @@ channel_update_limit: 5
 **Recommended:** `5-10`
 
 ### **role_update_limit**
+
 ```
 role_update_limit: 5
 ```
@@ -214,6 +234,7 @@ role_update_limit: 5
 **Recommended:** `5-10`
 
 ### **member_update_limit**
+
 ```
 member_update_limit: 5
 ```
@@ -224,6 +245,7 @@ member_update_limit: 5
 **Recommended:** `3-5`
 
 ### **unban_limit**
+
 ```
 unban_limit: 5
 ```
@@ -235,18 +257,21 @@ unban_limit: 5
 ---
 
 ### **time_window**
+
 ```
 time_window: 36000000  # 10 hours in milliseconds
 ```
 
 **What it does:** Time period for counting actions
 **Conversions:**
+
 - `36000000` = 10 hours
 - `3600000` = 1 hour
 - `1800000` = 30 minutes
 - `600000` = 10 minutes
 
 **How it affects limits:**
+
 - **Longer window** = More tolerant (allows more actions over time)
 - **Shorter window** = More sensitive (triggers on rapid actions)
 
@@ -255,6 +280,7 @@ time_window: 36000000  # 10 hours in milliseconds
 ---
 
 ### **ignored_role_ids**
+
 ```
 ignored_role_ids: ["1234567890123456789", "9876543210987654321"]
 ```
@@ -263,6 +289,7 @@ ignored_role_ids: ["1234567890123456789", "9876543210987654321"]
 **Perfect for:** Onboarding roles, autoroles, verification roles
 **How to get IDs:** Server Settings → Roles → Right-click role → Copy ID
 **Example use cases:**
+
 - Welcome roles given to new members
 - Roles assigned by reaction roles
 - Verification roles
@@ -273,17 +300,20 @@ ignored_role_ids: ["1234567890123456789", "9876543210987654321"]
 ## 📝 **4. Logging Section**
 
 ### **log_level**
+
 ```
 log_level: "info"  # Options: "error", "warning", "info", "debug"
 ```
 
 **What it controls:** How much information the bot logs
+
 - **"error"** - Only errors and critical issues
 - **"warning"** - Errors + warnings about suspicious activity
 - **"info"** - Warnings + general information
 - **"debug"** - Everything including technical details
 
 **Performance impact:**
+
 - **Higher levels** = More detailed logs = Slightly more CPU usage
 - **Lower levels** = Fewer logs = Better performance
 
@@ -292,6 +322,7 @@ log_level: "info"  # Options: "error", "warning", "info", "debug"
 ---
 
 ### **timestamp**
+
 ```
 timestamp: true
 ```
@@ -303,6 +334,7 @@ timestamp: true
 ---
 
 ### **log_webhook**
+
 ```
 log_webhook: "https://discord.com/api/webhooks/..."
 ```
@@ -315,6 +347,7 @@ log_webhook: "https://discord.com/api/webhooks/..."
 ---
 
 ### **log_owner_dm**
+
 ```
 log_owner_dm: false
 ```
@@ -329,6 +362,7 @@ log_owner_dm: false
 ## 👥 **5. Whitelist Section**
 
 ### **users**
+
 ```
 whitelisted:
   users: ["1111111111111111111", "2222222222222222222"]
@@ -344,6 +378,7 @@ whitelisted:
 ## 🎮 **6. RPC Section**
 
 ### **enabled**
+
 ```
 enabled: true
 ```
@@ -353,6 +388,7 @@ enabled: true
 **Recommended:** `false` for stealth, `true` for showing off
 
 ### **rotation**
+
 ```
 rotation: true
 ```
@@ -363,35 +399,181 @@ rotation: true
 
 ---
 
+## 🟢 **6.5 Status Section**
+
+### **type**
+
+```yaml
+status:
+  type: "dnd"
+```
+
+**What it does:** Sets your Discord online status
+**Options:**
+
+- `"online"` - 🟢 Online (green dot)
+- `"idle"` - 🟡 Idle/Away (yellow moon)
+- `"dnd"` - 🔴 Do Not Disturb (red)
+- `"invisible"` - ⚫ Invisible (appear offline)
+
+**Recommended:** `"dnd"` for less interruptions
+
+---
+
+### **browser**
+
+```yaml
+status:
+  browser: "Discord Client"
+```
+
+**What it does:** Sets the browser/client fingerprint for API requests
+**Options:**
+
+- `"Discord Client"` - Desktop app (Electron) - **Recommended**
+- `"Chrome"` - Chrome browser
+- `"Firefox"` - Firefox browser
+- `"Discord iOS"` - iPhone/iPad app
+- `"Discord Android"` - Android app
+
+**Recommended:** `"Discord Client"` for maximum stealth
+**Impact:** Affects x-super-properties header for API fingerprinting
+
+---
+
 ## 🎨 **7. Vanity Reversion Section**
 
 ### **password**
-```
+
+```yaml
 password: "YOUR_DISCORD_PASSWORD"
 ```
 
-**What it does:** Enables automatic vanity URL reversion
+**What it does:** Enables automatic vanity URL reversion using MFA authentication
 **Security:** 🔴 **Store securely, never share!**
 **Required for:** Vanity protection to work
-**Leave empty:** To disable vanity reversion
+**Leave empty:** To disable vanity reversion (punishment will still work)
 
 ---
 
 ### **fallback_vanity**
-```
+
+```yaml
 fallback_vanity: "myserver"
 ```
 
 **What it does:** Backup vanity code when original can't be determined
-**Use case:** When Discord's event data is incomplete
-**Format:** Just the code, not "discord.gg/code"
-**Recommended:** Set to your desired vanity code
+**Why needed:** Discord's event data sometimes comes as undefined/null
+**Format:** Just the code (e.g., `myserver`), NOT the full URL
+**Recommended:** Always set this to your desired vanity code
+
+---
+
+## 🚀 **8. Vanity Protection Mode**
+
+### **vanity_mode**
+
+```yaml
+vanity_mode: "audit" # Options: "audit", "normal", "fast"
+```
+
+**What it does:** Controls how vanity URL changes are detected and handled
+
+### **Mode Comparison:**
+
+| Mode       | Speed      | Punishment | Attacker Detection              | Stability   | Recommended For   |
+| ---------- | ---------- | ---------- | ------------------------------- | ----------- | ----------------- |
+| **audit**  | Fast       | ✅ Yes     | ✅ Via guildAuditLogEntryCreate | ✅ Stable   | ✅ **Most users** |
+| **normal** | Medium     | ✅ Yes     | ✅ Via audit logs               | ⚠️ Unstable | Not recommended   |
+| **fast**   | ⚡ Fastest | ❌ No      | ❌ No                           | ⚠️ Unstable | Not recommended   |
+
+### **Detailed Mode Explanations:**
+
+#### **audit** ✅ (Recommended)
+
+```yaml
+vanity_mode: "audit"
+```
+
+- Uses `guildAuditLogEntryCreate` event
+- **Most reliable** - receives audit log data directly from Discord
+- Stable attacker identification
+- Best for production servers
+- **This is the recommended mode for all users**
+
+#### **normal** ⚠️ (Unstable)
+
+```yaml
+vanity_mode: "normal"
+```
+
+- Uses `guildUpdate` event with audit log verification
+- ⚠️ **Suspected Issue:** May fail to detect vanity changes due to inconsistent event data
+- May work inconsistently depending on timing and race conditions
+- **Not recommended for production use**
+
+#### **fast** ⚠️ (Unstable)
+
+```yaml
+vanity_mode: "fast"
+```
+
+- Uses same `guildUpdate` event as normal mode
+- Focuses ONLY on speed - instant reversion
+- No punishment (skipped to save time)
+- No attacker identification
+- ⚠️ **Shares the same instability issues as normal mode**
+- **Not recommended for production use**
+
+---
+
+## ⚠️ **Known Issues**
+
+### **Normal & Fast Mode Instability**
+
+The `normal` and `fast` vanity protection modes use the `guildUpdate` event from `discord.js-selfbot-v13`. We have observed inconsistent behavior where vanity URL changes are sometimes not detected properly.
+
+**⚠️ Note:** The exact root cause is still under investigation. We suspect it may be related to the library's internal event handling or object cloning mechanism, but this is not yet confirmed. We are actively working on identifying and resolving this issue.
+
+**Symptoms:**
+
+- Vanity changes are not detected on the first event
+- `oldGuild.vanityURLCode` returns `undefined`
+- Protection may trigger intermittently
+
+**Workaround:** Use `audit` mode instead, which bypasses this issue entirely by using the `guildAuditLogEntryCreate` event.
+
+---
+
+## ⚡ **Vanity Reversion Performance**
+
+### **Expected Reversion Times:**
+
+| Scenario                 | Expected Time  |
+| ------------------------ | -------------- |
+| Cached MFA token         | **300-600ms**  |
+| Fresh MFA authentication | **700-1400ms** |
+
+**Note:** Times include Discord's server-side processing. MFA tokens are cached for 2 minutes.
+
+---
+
+### **Optimal Vanity Protection Setup:**
+
+```yaml
+vanity_reversion:
+  password: "your_password"
+  fallback_vanity: "yourvanity"
+
+vanity_mode: "audit" # Use audit mode for best stability
+```
 
 ---
 
 ## 🚀 **Quick Start Configurations**
 
 ### **Maximum Security (Recommended)**
+
 ```yaml
 antinuke_settings:
   punishment: "ban"
@@ -408,6 +590,7 @@ logs:
 ```
 
 ### **Balanced Protection**
+
 ```yaml
 antinuke_settings:
   punishment: "kick"
@@ -423,6 +606,7 @@ logs:
 ```
 
 ### **Minimal/Testing**
+
 ```yaml
 antinuke_settings:
   punishment: "none"
@@ -435,6 +619,7 @@ logs:
 ```
 
 ### **Mobile/Android Optimized**
+
 ```yaml
 antinuke_settings:
   auto_recovery: false
@@ -452,6 +637,7 @@ logs:
 ## ⚡ **Performance Tuning**
 
 ### **For Low-End Devices:**
+
 ```yaml
 antinuke_settings:
   auto_recovery: false
@@ -465,10 +651,11 @@ logs:
 ```
 
 ### **For High-Traffic Servers:**
+
 ```yaml
 antinuke_settings:
   recovery_delay: 1000
-  time_window: 1800000  # 30 minutes
+  time_window: 1800000 # 30 minutes
 
 logs:
   log_level: "warning"
@@ -480,24 +667,28 @@ logs:
 ## 🔧 **Common Configuration Mistakes**
 
 ### **❌ Wrong Token Format**
+
 ```yaml
 token: "mfa.123456789..."  # Wrong
 token: "MTEzMjMzODI1ND..."  # Correct - user token
 ```
 
 ### **❌ Invalid Server/User IDs**
+
 ```yaml
-server1_id: "123456789"  # Wrong - too short
-server1_id: "1234567890123456789"  # Correct - 19 digits
+server_id: "123456789"  # Wrong - too short
+server_id: "1234567890123456789"  # Correct - 19 digits
 ```
 
 ### **❌ Too Sensitive Limits**
+
 ```yaml
 ban_limit: 1  # Wrong - will ban legitimate admins
 ban_limit: 5  # Better - allows some admin actions
 ```
 
 ### **❌ Missing Vanity Password**
+
 ```yaml
 vanity_reversion:
   password: ""  # Wrong - vanity won't work

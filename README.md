@@ -23,9 +23,10 @@
 Vantrix is the **first open source working selfbot** that can actually revert unauthorized vanity URL changes in real-time. This breakthrough feature sets it apart from all other selfbots.
 
 ### **⚡ Key Capabilities**
+
 - **Instant Reversion**: Changes reverted within seconds using automated MFA authentication
 - **Smart Detection**: Distinguishes legitimate admin changes from malicious attempts
-- **Multi-Server Support**: Protect vanity URLs across multiple Discord servers simultaneously
+- **MFA Token Caching**: Faster subsequent reversions with cached authentication
 
 ---
 
@@ -33,19 +34,20 @@ Vantrix is the **first open source working selfbot** that can actually revert un
 
 ### **📊 Protection Matrix**
 
-| Threat Type | Detection | Response | Recovery |
-|-------------|-----------|----------|----------|
-| **Mass Bans** | ✅ Real-time | Punishment | Auto-unban victims |
-| **Mass Kicks** | ✅ Real-time | Punishment | DM invites sent |
-| **Channel Deletion** | ✅ Instant | Punishment | Auto-restore channels |
-| **Role Deletion** | ✅ Instant | Punishment | Auto-restore roles |
-| **Vanity Changes** | ✅ Instant | Punishment | Auto revert |
-| **Member Updates** | ✅ Smart | Context-aware | Selective recovery |
+| Threat Type          | Detection    | Response      | Recovery              |
+| -------------------- | ------------ | ------------- | --------------------- |
+| **Mass Bans**        | ✅ Real-time | Punishment    | Auto-unban victims    |
+| **Mass Kicks**       | ✅ Real-time | Punishment    | DM invites sent       |
+| **Channel Deletion** | ✅ Instant   | Punishment    | Auto-restore channels |
+| **Role Deletion**    | ✅ Instant   | Punishment    | Auto-restore roles    |
+| **Vanity Changes**   | ✅ Instant   | Punishment    | Auto revert           |
+| **Member Updates**   | ✅ Smart     | Context-aware | Selective recovery    |
 
 ### **🎯 Advanced Features**
+
 - **Smart Role Filtering**: Ignores onboarding/autorole actions
 - **Rate Limiting**: Prevents API abuse and detection
-- **Multi-Server Support**: Protect multiple servers simultaneously
+- **Database Persistence**: SQLite storage for reliable state management
 - **Owner Whitelisting**: Trusted users bypass all protections
 - **Configurable Thresholds**: Adjustable sensitivity levels
 
@@ -69,9 +71,10 @@ node index.js
 ```
 
 ### **🚀 Startup Preview**
+
 <div align="center">
   <img src="startup.png" alt="Vantrix Startup" width="100%">
-  <p><em>Beautiful startup banner with protection status</em></p>
+  <p><em>Startup banner with protection status</em></p>
 </div>
 
 ## ⚙️ Configuration
@@ -81,18 +84,18 @@ node index.js
 
 ```yaml
 selfbot:
-  token: "YOUR_DISCORD_TOKEN"  # ⚠️  NEVER SHARE THIS
-  server1_id: "1234567890123456789"  # Your server ID
-  owner1_id: "9876543210987654321"   # Your user ID
+  token: "YOUR_DISCORD_TOKEN" # ⚠️  NEVER SHARE THIS
+  server_id: "1234567890123456789" # Your server ID
+  owner1_id: "9876543210987654321" # Your user ID
 
 antinuke_settings:
-  punishment: "ban"  # ban, kick, or none
+  punishment: "ban" # ban, kick, or none
   auto_recovery: true
-  ignored_role_ids: ["1111111111111111111"]  # Onboarding/autorole IDs
+  ignored_role_ids: ["1111111111111111111"] # Onboarding/autorole IDs
 
 vanity_reversion:
-  password: "YOUR_DISCORD_PASSWORD"  # For vanity protection
-  fallback_vanity: "myserver"  # Backup vanity code
+  password: "YOUR_DISCORD_PASSWORD" # For vanity protection
+  fallback_vanity: "myserver" # Backup vanity code
 ```
 
 </details>
@@ -102,14 +105,14 @@ vanity_reversion:
 
 ```yaml
 # Protection thresholds
-ban_limit: 5        # Max bans per time window
-kick_limit: 5       # Max kicks per time window
-time_window: 36000000  # 10 hours in milliseconds
+ban_limit: 5 # Max bans per time window
+kick_limit: 5 # Max kicks per time window
+time_window: 36000000 # 10 hours in milliseconds
 
 # Recovery settings
 recover_channels: true
 recover_roles: true
-recovery_delay: 1500  # ms between recoveries
+recovery_delay: 1500 # ms between recoveries
 
 # Logging
 log_webhook: "https://discord.com/api/webhooks/..."
@@ -140,22 +143,40 @@ log_owner_dm: true
 
 ```
 Vantrix/
-├── index.js              # Main entry point
-├── config.yml            # Configuration file
-├── docs/                 # Documentation
+├── index.js                    # Main entry point
+├── config.yml                  # Configuration file
+├── docs/                       # Documentation
+├── db/                         # SQLite database storage
 ├── handlers/
-│   ├── EventsHandler.js  # Event management
-│   └── Anticrash.js      # Crash protection
+│   ├── EventsHandler.js        # Event management
+│   └── Anticrash.js            # Crash protection
+├── events/
+│   ├── client/
+│   │   ├── ready.js            # Bot ready event
+│   │   ├── RateLimit.js        # Rate limit handler
+│   │   └── ...
+│   └── security/
+│       ├── AntiMassBan.js      # Mass ban protection
+│       ├── AntiMassKick.js     # Mass kick protection
+│       ├── AntiChannelDelete.js # Channel deletion protection
+│       ├── AntiRoleDelete.js   # Role deletion protection
+│       ├── AntiVanityAudit.js  # Vanity protection (audit mode)
+│       ├── AntiVanityChange.js # Vanity protection (normal/fast)
+│       └── ...
 └── utils/
-    ├── AntiNukeManager.js # Core protection logic
-    ├── Logger.js          # Logging system
-    ├── WhitelistManager.js # User management
-    └── RateLimitManager.js # API rate limiting
+    ├── AntiNukeManager.js      # Core protection logic
+    ├── Logger.js               # Logging system
+    ├── db.js                   # Database operations
+    ├── MfaTokenCache.js        # MFA token caching
+    ├── TokenValidator.js       # Token health monitoring
+    ├── WhitelistManager.js     # User management
+    └── RateLimitManager.js     # API rate limiting
 ```
 
 ## 🤝 Contributing
 
 We welcome contributions! Please:
+
 1. Fork the repository
 2. Create a feature branch
 3. Submit a pull request
@@ -173,10 +194,12 @@ We welcome contributions! Please:
 ## 🙏 Credits & Acknowledgments
 
 ### Core Development Team
+
 - **faiz4sure** - Lead Developer & Project Creator
 - **Team Zyrus** - Development & Testing
 
 ### Special Thanks
+
 - **SS Bhai** - Critical contribution to vanity URL reversion system testing and optimization
 - **Discord.js-selfbot-v13** - Underlying framework
 - **Open source community** - Inspiration and tools
