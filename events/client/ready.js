@@ -49,6 +49,13 @@ export default {
 
     console.log(readyBanner);
     console.log("");
+    Logger.warn("PROJECT STATUS: DEPRECATED & OUTDATED");
+    Logger.warn("Vantrix relies on discord.js-selfbot-v13 which is no longer maintained or recommended for security.");
+    Logger.system("Code remains open-source for educational and reference purposes.");
+    Logger.info("A new, ultra-fast Rust standalone engine has been released: Discord Vanity Protector (DVP)");
+    Logger.info("Features: Sub-ms vanity revert | Windows Electron TLS Impersonation | Python, Bun, Node.js & Rust support");
+    Logger.info("Repository: https://github.com/faiz4sure/discord-vanity-protector");
+    console.log("");
 
     console.log(
       kleur.green().bold("📱 Logged in as: ") + kleur.white(client.user.tag),

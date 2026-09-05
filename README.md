@@ -1,3 +1,13 @@
+> [!WARNING]
+> ### ⚠️ Project Deprecated in Favor of [Discord Vanity Protector (DVP)](https://github.com/faiz4sure/discord-vanity-protector)
+>
+> **Vantrix** is now outdated as it relies on `discord.js-selfbot-v13`, and is **no longer recommended for security or production use**.
+>
+> While this repository remains **100% public & open-source** for archival and learning purposes, we strongly recommend switching to our next-generation standalone Rust engine:
+>
+> 🚀 **[faiz4sure/discord-vanity-protector](https://github.com/faiz4sure/discord-vanity-protector)**  
+> *Ultra-fast Rust engine with Windows Electron TLS impersonation, 24/7 Gateway resilience, and zero-setup loaders for Python, Bun, Node.js & Rust.*
+
 <div align="center">
 
 <p align="center">
